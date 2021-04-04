@@ -1,5 +1,8 @@
 .App {
   text-align: center;
+  /*background: rgb(86,128,233);
+  background: linear-gradient(15deg, rgba(86,128,233,0.7959558823529411) 0%, rgba(132,206,235,1) 46%, rgba(193,200,228,1) 100%);  
+  */
 }
 
 .App-logo {
@@ -28,6 +31,30 @@
   color: #61dafb;
 }
 
+.homeJumbo{
+  background-image:url('./images/Desktop_4.jpg');
+  background-position: bottom;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.btn-hover:hover{
+  background:rgb(123,197,174, 0.1) !important
+}
+.btn-hover:focus{
+  background:none!important
+}
+.MuiTableCell-body{
+  color:rgb(229,229,234) !important;
+}
+.MuiTableBody-root{
+  background-color:rgb(44,44,46) !important;
+}
+.MuiTableHead-root{
+  background-color: rgb(28,28,30) !important;
+}
+.MuiTableCell-head{
+  color:rgb(242,242,247) !important;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
