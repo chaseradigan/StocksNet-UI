@@ -12,12 +12,14 @@ export default class FavoriteStocks extends Component {
         this.state = {
             favorites: [],
             stocks: [],
+            prices: [],
             loading: true
         }
     }
     componentDidMount() {
         this.getStocks();
         this.getUsersFavorites();
+        this.getStockPrices();
     }
 
     async getUsersFavorites() {
@@ -31,24 +33,24 @@ export default class FavoriteStocks extends Component {
                 console.log(error);
             });
     }
-    async toggleOwnerShip(ticker){
-        await axios.post(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/toggleown`,{
-            uid:cookie.load('username'),
-            ticker:ticker
+    async toggleOwnerShip(ticker) {
+        await axios.post(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/toggleown`, {
+            uid: cookie.load('username'),
+            ticker: ticker
         })
-        .then(response=>{
-            console.log(response.data)
-            let favorites = this.state.favorites;
-            for(let i = 0; i < favorites.length; i++){
-                if(favorites[i].key.ticker === ticker){
-                    favorites[i].owned = !favorites[i].owned
-                    break;
+            .then(response => {
+                console.log(response.data)
+                let favorites = this.state.favorites;
+                for (let i = 0; i < favorites.length; i++) {
+                    if (favorites[i].key.ticker === ticker) {
+                        favorites[i].owned = !favorites[i].owned
+                        break;
+                    }
                 }
-            }
-            this.setState({favorites:favorites})
-        }).catch(error=>{
-            console.log(error)
-        })
+                this.setState({ favorites: favorites })
+            }).catch(error => {
+                console.log(error)
+            })
     }
     async getStocks() {
         this.setState({ loading: true })
@@ -58,6 +60,31 @@ export default class FavoriteStocks extends Component {
         }).catch(error => {
             console.log(error);
         })
+    }
+    async removeFavorite(ticker) {
+        await axios.delete(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/${cookie.load('username')}/${ticker}`)
+            .then(response => {
+                console.log(response);
+                let favorites = [];
+                for (let i = 0; i < this.state.favorites.length; i++) {
+                    if (this.state.favorites[i].key.ticker !== ticker) {
+                        favorites.push(this.state.favorites[i]);
+                    }
+                }
+                this.setState({ favorites: favorites })
+            }).catch(error => {
+                console.log(error);
+            })
+    }
+    async getStockPrices() {
+        this.setState({loading:true})
+        await axios.get("http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stockhistory/latest")
+            .then(response => {
+                console.log(response);
+                this.setState({ prices: response.data, loading:false })
+            }).catch(error => {
+                console.log(error);
+            })
     }
     render() {
         return (
@@ -72,18 +99,20 @@ export default class FavoriteStocks extends Component {
                             </Typography>
                             <Row>
                                 {this.state.favorites.filter(e => { return e.owned === true }).map((favorite) => (
-                                    <Col sm={12} md={6} lg={4} xl={3} >
+                                    <Col key={favorite.key.ticker} sm={12} md={6} lg={4} xl={3} >
                                         <FavoritesCard
                                             p={this.props}
                                             favorite={favorite}
                                             stock={this.state.stocks.filter(e => e.ticker === favorite.key.ticker)[0]}
-                                            toggleOwnerShip={(ownership)=>this.toggleOwnerShip(ownership)}
+                                            price={this.state.prices.filter(e=>e.key.ticker === favorite.key.ticker)[0]}
+                                            toggleOwnerShip={(ownership) => this.toggleOwnerShip(ownership)}
+                                            removeFavorite={(ticker) => this.removeFavorite(ticker)}
                                         />
                                     </Col>
                                 ))
                                 }
                             </Row>
-                            <Typography style={{ textAlign: 'left', marginTop:32 }} variant="h5" component="h5">
+                            <Typography style={{ textAlign: 'left', marginTop: 32 }} variant="h5" component="h5">
                                 Favorite unowned stocks
                             </Typography>
                             <Row>
@@ -93,7 +122,9 @@ export default class FavoriteStocks extends Component {
                                             p={this.props}
                                             favorite={favorite}
                                             stock={this.state.stocks.filter(e => e.ticker === favorite.key.ticker)[0]}
-                                            toggleOwnerShip={(ticker)=>this.toggleOwnerShip(ticker)}
+                                            price={this.state.prices.filter(e=>e.key.ticker === favorite.key.ticker)[0]}
+                                            toggleOwnerShip={(ticker) => this.toggleOwnerShip(ticker)}
+                                            removeFavorite={(ticker) => this.removeFavorite(ticker)}
                                         />
                                     </Col>
                                 ))

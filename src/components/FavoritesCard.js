@@ -3,9 +3,6 @@ import { Avatar, Card, CardContent, CardActions, CardHeader, Collapse, IconButto
 import FavoriteIcon from "@material-ui/icons/Favorite"
 import FullscreenIcon from "@material-ui/icons/Fullscreen"
 import { Col, Row } from 'react-bootstrap';
-import cookie from "react-cookies";
-import axios from "axios";
-
 export default class FavoritesCard extends Component {
     constructor() {
         super();
@@ -14,9 +11,7 @@ export default class FavoritesCard extends Component {
             favorite: false
         }
     }
-    removeFavorite() {
-        console.log("ADD REMOVE ENDPOINT")
-    }
+    
 
     render() {
         // {
@@ -26,6 +21,7 @@ export default class FavoritesCard extends Component {
         //     },
         //     "owned": true
         // }
+        //console.log(this.props.price)
         return (
             <Card
                 style={{
@@ -59,12 +55,12 @@ export default class FavoritesCard extends Component {
                     <Row style={{ textAlign: 'center', marginBottom: 10 }}>
                         <Col>
                             <Typography style={{ margin: 'auto' }} className="textGreen" variant="h4" color="textSecondary" component="h4">
-                                ${this.props.favorite.price}
+                                ${this.props.price && this.props.price['close'] ? this.props.price['close'] : "N/A"}
                             </Typography>
                         </Col>
                         <Col>
                             <Typography style={{ margin: 'auto' }} variant="h4" color="textSecondary" component="h4">
-                                {0.9}
+                                {this.props.price && this.props.price['sentiment'] ? this.props.price['sentiment']: "- -"}
                             </Typography>
                         </Col>
                     </Row>
@@ -73,8 +69,8 @@ export default class FavoritesCard extends Component {
                             <Typography style={{ fontSize: 12 }}>
                                 24h +/-
                             </Typography>
-                            <Typography variant="p" color="textSecondary" component="p">
-                                ${this.props.favorite.price}
+                            <Typography  color="textSecondary" component="p">
+                                $ --
                             </Typography>
                         </Col>
 
@@ -82,14 +78,14 @@ export default class FavoritesCard extends Component {
                             <Typography style={{ fontSize: 12 }}>
                                 24h +/-
                             </Typography>
-                            <Typography variant="p" color="textSecondary" component="p">
-                                ${this.props.favorite.price}
+                            <Typography  color="textSecondary" component="p">
+                                --
                             </Typography>
                         </Col>
                     </Row>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <IconButton onClick={() => this.removeFavorite()} aria-label="add to favorites">
+                    <IconButton onClick={() => this.props.removeFavorite(this.props.favorite.key.ticker)} aria-label="add to favorites">
                         <FavoriteIcon style={{ color: "pink" }} />
                     </IconButton>
 
