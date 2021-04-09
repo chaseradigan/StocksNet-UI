@@ -55,6 +55,15 @@
 .MuiTableCell-head{
   color:rgb(242,242,247) !important;
 }
+.textGreen{
+  color:#028C6A !important;
+}
+.MuiInput-underline:after{
+  border-bottom-color:#028C6A !important;
+}
+.MuiFormLabel-root.Mui-focused{
+  color:#028C6A !important;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

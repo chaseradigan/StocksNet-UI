@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Form, Input, Button, Checkbox, Layout, Row, Col, Divider } from 'antd';
-import axios from 'axios';
+import { Form, Input, Button, Checkbox, Layout, Row, Col} from 'antd';
 import { Spinner } from 'react-bootstrap';
+import Navigation from '../components/Navigation';
+import axios from 'axios';
 const tailLayout = {
     wrapperCol: { offset: 2, span: 8 },
 };
@@ -19,12 +20,14 @@ export default class SignUp extends Component {
     async onSubmit(e) {
         this.setState({ loading: true });
         console.log(e)
-        await axios.post('http://localhost:8080/api/v1/users', {
-                emailId: e.emailId,
-                userName: e.userName,
-                passWord: e.passWord
-            
-        }).then(response => {
+        let user = {
+            emailId: e.email,
+            userName: e.username,
+            passWord: e.password
+        }
+        console.log(user);
+        await axios.post('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/users',user)
+        .then(response => {
             console.log(response);
             this.setState({ loading: false });
             //this.props.history.push('/stocks');
@@ -43,6 +46,8 @@ export default class SignUp extends Component {
     }
     render() {
         return (
+            <>
+            <Navigation p={this.props}/>
             <div style={{ padding: 42 }}>
                 <Layout className="shadow" style={{
                     backgroundColor: 'white', textAlign: "-webkit-center",
@@ -73,16 +78,16 @@ export default class SignUp extends Component {
                                     </h1>
                                 <Form.Item
                                     label="Username"
-                                    name="userName"
+                                    name="username"
                                     style={{ textAlign: 'left' }}
-                                    rules={[{ required: true, message: 'Input Username' }]}
+                                    rules={[{ required: true, message: 'Input username' }]}
 
                                 >
                                     <Input />
                                 </Form.Item>
                                 <Form.Item
                                     label="Email"
-                                    name="emailId"
+                                    name="email"
                                     style={{ textAlign: 'left' }}
                                     rules={[{ required: true, message: 'Input Email Address' }]}
 
@@ -92,10 +97,9 @@ export default class SignUp extends Component {
 
                                 <Form.Item
                                     label="Password"
-                                    name="passWord"
+                                    name="password"
                                     style={{ textAlign: 'left' }}
-                                    rules={[{ required: true, message: 'Input Password' }]}
-                                    onChange={(e) => this.onChange(e)}
+                                    rules={[{ required: true, message: 'Input password' }]}
                                 >
                                     <Input.Password />
                                 </Form.Item>
@@ -112,7 +116,7 @@ export default class SignUp extends Component {
 
                                 <Form.Item>
                                     Have an account already?
-                            <Button disabled={this.state.loading} type="link" onClick={() => this.props.history.push('/login')}>
+                            <Button disabled={this.state.loading} type="link" onClick={() => this.props.p.history.push('/login')}>
                                         {this.state.loading ? <Spinner /> : 'Login'}
                                     </Button>
                                 </Form.Item>
@@ -121,6 +125,7 @@ export default class SignUp extends Component {
                     </Row>
                 </Layout>
             </div>
+            </>
         )
     }
 }

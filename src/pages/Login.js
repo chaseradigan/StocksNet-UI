@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import {message, Form, Input, Button, Checkbox, Layout, Row, Col, Divider } from 'antd';
+import { Form, Input, Button, Checkbox, Layout, Row, Col } from 'antd';
+import cookie from 'react-cookies'
 import axios from 'axios';
+import Navigation from '../components/Navigation';
 const tailLayout = {
     wrapperCol: { offset: 2, span: 8 },
 };
@@ -17,17 +19,20 @@ export default class Login extends Component {
     }
 
     async onSubmit(e) {
-        this.setState({loading:true})
-        console.log(e)
-        await axios.get('http://localhost:8080/api/v1/users').then(response=>{
+        this.setState({loading:true});
+        console.log(e);
+        let username = e.username;
+        let password = e.password;
+        await axios.get('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/users').then(response=>{
             console.log(response);
             let users = response.data;
             users.map(user=>{
-                if(user.userName == e.userName && user.passWord == e.passWord){
+                if(user.userName === username && user.passWord === password){
+                    cookie.save('username', user.id);
                     this.setState({success:true});
-                    this.props.history.push("/favorites")
+                    this.props.history.push("/favorites");
                 }else{
-                    this.setState({error:"Incorrect UserName or Password"});
+                    this.setState({error:"Incorrect username or password"});
                 }
             });
             this.setState({loading:false});
@@ -37,10 +42,12 @@ export default class Login extends Component {
         })
     }
     onFailed(e) {
-        console.log(e)
+        console.log(e);
     }
     render() {
         return (
+            <>
+            <Navigation p={this.props}/>
             <div style={{ padding: 42 }}>
                 <Layout className="shadow" style={{
                     backgroundColor: 'white', textAlign: "-webkit-center",
@@ -71,19 +78,19 @@ export default class Login extends Component {
                                     </h1>
                                 
                                 <Form.Item
-                                    label="UserName"
-                                    name="userName"
+                                    label="Username"
+                                    name="username"
                                     style={{ textAlign: 'left' }}
-                                    rules={[{ required: true, message: 'Input Email Address' }]}
+                                    rules={[{ required: true, message: 'Input Username' }]}
                                 >
                                     <Input autoComplete="off"/>
                                 </Form.Item>
 
                                 <Form.Item
                                     label="Password"
-                                    name="passWord"
+                                    name="password"
                                     style={{ textAlign: 'left' }}
-                                    rules={[{ required: true, message: 'Input Password' }]}
+                                    rules={[{ required: true, message: 'Input password' }]}
                                 >
                                     <Input.Password />
                                 </Form.Item>
@@ -109,6 +116,7 @@ export default class Login extends Component {
                     </Row>
                 </Layout>
             </div>
+            </>
         )
     }
 }

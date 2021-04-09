@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
 import { Col, Layout, Button, Row } from 'antd';
-import { AppBar, Card, CardContent, Toolbar, Typography } from '@material-ui/core';
+import { Card, CardContent, Typography } from '@material-ui/core';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import stocklottie from '../images/stocklottie.json';
 import Lottie from 'lottie-react';
-const { Header, Footer, Content } = Layout;
+import Navigation from '../components/Navigation';
+const {  Content } = Layout;
 export default class Home extends Component {
     constructor() {
         super();
@@ -27,6 +28,7 @@ export default class Home extends Component {
     render() {
         return (
             <Layout style={{ backgroundColor: "white" }}>
+                <Navigation p={this.props}/>
                 <Row style={{ height: "80vh" }}>
                     <Col span={14}>
 

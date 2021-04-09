@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import { Button } from 'antd';
 import { AppBar, Typography, Toolbar } from '@material-ui/core';
+import cookie from 'react-cookies'
 export default class Navigation extends Component {
     constructor() {
         super();
         this.state = {
             scrollingDown: false,
-            active: "/"
+            active: "/",
+            loggedIn: false
         }
         //#D1EDE1, #7BC5AE, #028C6A
     }
@@ -18,13 +20,22 @@ export default class Navigation extends Component {
                 this.setState({ scrollingDown: false })
             }
         });
-        this.setState({active:this.props.location.pathname})
+        this.setState({
+            loggedIn: cookie.load('username') === undefined ? false:true
+        })
+
     }
     onClick(location) {
         this.setState({ active: location });
-        this.props.history.push(location);
+        this.props.p.history.push(location);
+    }
+    handleLogout(){
+        cookie.remove('username', {path:'/'});
+        this.setState({loggedIn:false})
+        this.props.p.history.push("/");
     }
     render() {
+
         return (
             <AppBar color="transparent" className={this.state.scrollingDown ? "shadowBottom" : ""} style={{ boxShadow: "none", backgroundColor: "white", color: "black", paddingTop: 24, paddingLeft: 54 }} position="sticky">
                 <Toolbar>
@@ -55,21 +66,33 @@ export default class Navigation extends Component {
                         type="text"
                         className="btn-hover"
                         onClick={() => this.onClick("/favorites")}
+                        hidden={cookie.load('username') === undefined || !this.state.loggedIn}
                     >
                         Favorites
                     </Button>
                     <Button
                         size={"large"}
                         style={{ marginLeft: "auto", backgroundColor: "#028C6A", color: "white", border: 'none' }}
-                        onClick={() => this.props.history.push("/login")}>
+                        onClick={() => this.props.p.history.push("/login")}
+                        hidden={cookie.load('username') !== undefined || this.state.loggedIn}
+                    >
                         Log in
                     </Button>
                     <Button
                         size="large"
                         style={{ marginLeft: 20, backgroundColor: "black", color: 'white', border: 'none' }}
-                        onClick={() => this.props.history.push("/signup")}
+                        onClick={() => this.props.p.history.push("/signup")}
+                        hidden={cookie.load('username') !== undefined || this.state.loggedIn}
                     >
                         Sign up
+                    </Button>
+                    <Button
+                        size={"large"}
+                        style={{ marginLeft: "auto", backgroundColor: "#028C6A", color: "white", border: 'none' }}
+                        onClick={() => this.handleLogout()}
+                        hidden={cookie.load('username') === undefined || !this.state.loggedIn}
+                    >
+                        Logout
                     </Button>
                 </Toolbar>
             </AppBar>
