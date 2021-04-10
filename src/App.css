@@ -61,8 +61,11 @@
 .MuiInput-underline:after{
   border-bottom-color:#028C6A !important;
 }
-.MuiFormLabel-root.Mui-focused{
+.MuiFormLabel-root.Mui-focused, .MuiButton-textPrimary{
   color:#028C6A !important;
+}
+.MuiPickersToolbar-toolbar, .MuiPickersDay-daySelected{
+  background-color:#028C6A !important;
 }
 @keyframes App-logo-spin {
   from {

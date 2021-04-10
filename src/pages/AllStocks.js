@@ -31,6 +31,7 @@ export default class AllStocks extends Component {
             console.log(error);
         })
     }
+    
     async getUsersFavorites() {
         this.setState({ loading: true })
         await axios
@@ -60,6 +61,21 @@ export default class AllStocks extends Component {
             console.log(error);
         });
 
+    }
+    async removeFavorite(ticker) {
+        await axios.delete(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/${cookie.load('username')}/${ticker}`)
+            .then(response => {
+                console.log(response);
+                let favorites = [];
+                for (let i = 0; i < this.state.favorites.length; i++) {
+                    if (this.state.favorites[i].key.ticker !== ticker) {
+                        favorites.push(this.state.favorites[i]);
+                    }
+                }
+                this.setState({ favorites: favorites })
+            }).catch(error => {
+                console.log(error);
+            })
     }
     handleSearch(searchValue) {
         //console.log(searchValue)
@@ -94,7 +110,9 @@ export default class AllStocks extends Component {
                                             <TableCell>{stock.companyName}</TableCell>
                                             <TableCell hidden={cookie.load("username") === undefined}>
                                                 <IconButton
-                                                    onClick={() => this.addFavorite(stock.ticker)}
+                                                    onClick={() =>
+                                                        this.state.favorites.filter(e => { return e.key.ticker === stock.ticker }).length > 0 ? this.removeFavorite(stock.ticker):
+                                                        this.addFavorite(stock.ticker)}
                                                 >
                                                     {
                                                         this.state.favorites.filter(e => { return e.key.ticker === stock.ticker }).length > 0 ?
