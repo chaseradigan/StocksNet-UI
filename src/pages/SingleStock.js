@@ -40,7 +40,7 @@ export default class SingleStock extends Component {
             allTweets: [],
             page: 0,
             active: 'positive',
-            active2: 'date',
+            active2: 'all',
             checked: false,
             avgSentiment: 0,
             totalTweets: 0,
@@ -51,8 +51,8 @@ export default class SingleStock extends Component {
     componentDidMount() {
         this.getStockHistory();
         this.getAllTweets();
-        this.getWordCloudDate();
-        this.getBestDate();
+        this.getWordCloud();
+        this.getBest();
     }
     async getWordCloud() {
         console.log()
@@ -302,6 +302,21 @@ export default class SingleStock extends Component {
                             <Row>
                                 <div style={{ textAlign: "left", padding: 20, paddingTop: 30 }}>
                                     <ButtonGroup aria-label="Basic example" style={{marginRight:22}}>
+                                    <Button
+                                            style={this.state.active2 === 'all' ? { backgroundColor: "black", color: "white" } : {backgroundColor:"rgba(0,0,0,0.1)"}}
+                                            variant="secondary"
+                                            onClick={() => {
+                                                this.getWordCloud();
+                                                if (this.state.active === "positive") {
+                                                    this.getBest();
+                                                }
+                                                else if (this.state.active === "negative") {
+                                                    this.getWorst();
+                                                }
+                                                this.setState({ active2: 'all' });
+                                            }} >
+                                            All
+                                                  </Button>
                                         <Button
                                             style={this.state.active2 === 'date' ? { backgroundColor: "black", color: "white" } : {backgroundColor:"rgba(0,0,0,0.1)"}}
                                             variant="secondary"
@@ -317,21 +332,7 @@ export default class SingleStock extends Component {
                                             }} >
                                             By Date
                                                   </Button>
-                                        <Button
-                                            style={this.state.active2 === 'all' ? { backgroundColor: "black", color: "white" } : {backgroundColor:"rgba(0,0,0,0.1)"}}
-                                            variant="secondary"
-                                            onClick={() => {
-                                                this.getWordCloud();
-                                                if (this.state.active === "positive") {
-                                                    this.getBest();
-                                                }
-                                                else if (this.state.active === "negative") {
-                                                    this.getWorst();
-                                                }
-                                                this.setState({ active2: 'all' });
-                                            }} >
-                                            All
-                                                  </Button>
+                                       
                                     </ButtonGroup>
                                     <MuiPickersUtilsProvider utils={MomentUtils}>
                                         <DatePicker
