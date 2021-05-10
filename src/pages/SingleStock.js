@@ -29,16 +29,18 @@ export default class SingleStock extends Component {
         super();
         this.state = {
             data: [],
-            price:'',
+            price: '',
             fromDate: moment().subtract(1, 'year'),
-            toDate: moment().subtract(2, 'weeks'),
-            tweetsDate: moment('2021-04-9'),
+            toDate: moment('2021-04-15'),
+            tweetsDate: moment('2021-04-15'),
             loading: true,
             wordCount: [],
             tweets: [],
             loadingTweets: true,
+            allTweets: [],
             page: 0,
             active: 'positive',
+            active2: 'date',
             checked: false,
             avgSentiment: 0,
             totalTweets: 0,
@@ -49,12 +51,31 @@ export default class SingleStock extends Component {
     componentDidMount() {
         this.getStockHistory();
         this.getAllTweets();
-        this.getWordCloud();
+        this.getWordCloudDate();
         this.getBestDate();
     }
     async getWordCloud() {
         console.log()
         await axios.get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/wordcount/$${this.props.match.params.ticker}`)
+            .then(response => {
+                console.log(response.data);
+                let wordCount = [];
+                for (let i = 0; i < response.data.length; i++) {
+                    let count = {};
+                    count.text = response.data[i].word;
+                    count.value = response.data[i].value
+                    wordCount.push(count);
+                }
+                this.setState({ wordCount: wordCount });
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+    async getWordCloudDate() {
+        console.log();
+        let date = this.state.tweetsDate.format("MMMDDYYYY")
+        await axios.get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/wordcount/$${this.props.match.params.ticker}/${date}`)
             .then(response => {
                 console.log(response.data);
                 let wordCount = [];
@@ -77,7 +98,7 @@ export default class SingleStock extends Component {
             .then(response => {
                 console.log(response.data);
                 let temp = response.data.reverse();
-                this.setState({ loading: false, data: temp, price:temp[temp.length-1].close });
+                this.setState({ loading: false, data: temp, price: temp[temp.length - 1].close });
                 if (temp.length > 0) {
                     this.setState({ fromDate: moment(temp[0].date) })
                 }
@@ -102,6 +123,7 @@ export default class SingleStock extends Component {
                 let end = moment(data[data.length - 1].date).format('YYYY-MM-DD').toString();
                 console.log(end)
                 this.setState({
+                    allTweets: response.data,
                     avgSentiment: Number(avg).toFixed(3),
                     totalTweets: data.length,
                     tweetsStart: start,
@@ -236,7 +258,7 @@ export default class SingleStock extends Component {
                                     <Card>
                                         <CardHeader
                                             title={
-                                                <h4 style={{marginBottom:0}}>Price</h4>
+                                                <h4 style={{ marginBottom: 0 }}>Price</h4>
                                             }
                                         />
                                         <CardContent>
@@ -246,7 +268,7 @@ export default class SingleStock extends Component {
                                     <Card>
                                         <CardHeader
                                             title={
-                                                <h5 style={{marginBottom:0}}>Average Sentiment</h5>
+                                                <h5 style={{ marginBottom: 0 }}>Average Sentiment</h5>
                                             }
                                         />
                                         <CardContent>
@@ -256,17 +278,17 @@ export default class SingleStock extends Component {
                                     <Card>
                                         <CardHeader
                                             title={
-                                                <h5 style={{marginBottom:0}}>Tweet Count</h5>
+                                                <h5 style={{ marginBottom: 0 }}>Total Tweets</h5>
                                             }
                                         />
                                         <CardContent>
                                             <span style={{ fontSize: 22 }}>{this.state.totalTweets}</span>
                                         </CardContent>
                                     </Card>
-                                    <Card style={{ borderBottom: 'none', boxShadow:"none" }}>
+                                    <Card style={{ borderBottom: 'none', boxShadow: "none" }}>
                                         <CardHeader
                                             title={
-                                                <h5 style={{marginBottom:0}}>Tweet Range</h5>
+                                                <h5 style={{ marginBottom: 0 }}>Tweet Range</h5>
                                             }
                                         />
                                         <CardContent>
@@ -278,7 +300,69 @@ export default class SingleStock extends Component {
                                 </Col>
                             </Row>
                             <Row>
+                                <div style={{ textAlign: "left", padding: 20, paddingTop: 30 }}>
+                                    <ButtonGroup aria-label="Basic example" style={{marginRight:22}}>
+                                        <Button
+                                            style={this.state.active2 === 'date' ? { backgroundColor: "black", color: "white" } : {backgroundColor:"rgba(0,0,0,0.1)"}}
+                                            variant="secondary"
+                                            onClick={() => {
+                                                this.getWordCloudDate();
+                                                if (this.state.active === "positive") {
+                                                    this.getBestDate();
+                                                }
+                                                else if (this.state.active === "negative") {
+                                                    this.getWorstDate();
+                                                }
+                                                this.setState({ active2: 'date' });
+                                            }} >
+                                            By Date
+                                                  </Button>
+                                        <Button
+                                            style={this.state.active2 === 'all' ? { backgroundColor: "black", color: "white" } : {backgroundColor:"rgba(0,0,0,0.1)"}}
+                                            variant="secondary"
+                                            onClick={() => {
+                                                this.getWordCloud();
+                                                if (this.state.active === "positive") {
+                                                    this.getBest();
+                                                }
+                                                else if (this.state.active === "negative") {
+                                                    this.getWorst();
+                                                }
+                                                this.setState({ active2: 'all' });
+                                            }} >
+                                            All
+                                                  </Button>
+                                    </ButtonGroup>
+                                    <MuiPickersUtilsProvider utils={MomentUtils}>
+                                        <DatePicker
+                                        hidden={this.state.active2==="all"}
+                                            value={this.state.tweetsDate}
+                                            format="MMM Do, YYYY"
+                                            onChange={(e) => this.setState({ tweetsDate: e })} />
+                                    </MuiPickersUtilsProvider>
+                                    <Button
+                                    hidden={this.state.active2==="all"}
+                                        onClick={() => {
+                                            if (this.state.active === "positive") {
+                                                this.getBestDate();
+                                            }
+                                            else if (this.state.active === "negative") {
+                                                this.getWorstDate();
+                                            }
+                                            else if (this.state.active === "combined") {
+                                                this.getTweets();
+                                            }
+
+                                        }}
+                                    >
+                                        Go
+                                        </Button>
+                                </div>
+
+                            </Row>
+                            <Row>
                                 <Col style={{ textAlign: 'center' }}>
+
                                     <ReactWordcloud
                                         words={this.state.wordCount}
                                         options={{ fontSizes: [16, 36], padding: 6 }}
@@ -295,7 +379,7 @@ export default class SingleStock extends Component {
                                 </> :
                                 <Container fluid style={{ marginTop: 20 }}>
                                     <h2 style={{ textAlign: 'left' }}>Tweets <TwitterIcon style={{ color: '#1DA1F2' }} /></h2>
-                                    <div style={{ textAlign: 'left' }}>
+                                    <div style={{ textAlign: 'left', marginBottom:22 }}>
                                         <ButtonGroup aria-label="Basic example">
                                             <Button
                                                 style={this.state.active === 'positive' ? { backgroundColor: "#1DA1F2", color: "white" } : {}}
@@ -304,52 +388,33 @@ export default class SingleStock extends Component {
                                                     this.getBest();
                                                     this.setState({ active: 'positive' });
                                                 }} >
-                                                Positive
+                                                Best
                                                   </Button>
                                             <Button
                                                 style={this.state.active === 'negative' ? { backgroundColor: "#1DA1F2", color: "white" } : {}}
                                                 variant="secondary"
                                                 onClick={() => {
-                                                    this.getWorstDate();
+                                                    if (this.state.active2 === "date")
+                                                        this.getWorstDate();
+                                                    else
+                                                        this.getWorst();
                                                     this.setState({ active: 'negative' });
                                                 }}>
-                                                Negative
+                                                Worst
                                                   </Button>
                                             <Button
-                                                style={this.state.active === 'all' ? { backgroundColor: "#1DA1F2", color: "white" } : {}}
+                                                style={this.state.active === 'combined' ? { backgroundColor: "#1DA1F2", color: "white" } : {}}
                                                 variant="secondary"
+                                                hidden={this.state.active2 === "all"}
                                                 onClick={() => {
                                                     this.getTweets();
-                                                    this.setState({ active: 'all' });
+                                                    this.setState({ active: 'combined' });
                                                 }}>
-                                                All
+                                                Combined
                                                   </Button>
                                         </ButtonGroup>
                                     </div>
-                                    <div style={{ textAlign: "left", padding: 20, paddingTop: 30 }}>
-                                        <MuiPickersUtilsProvider utils={MomentUtils}>
-                                            <DatePicker
-                                                value={this.state.tweetsDate}
-                                                format="MMM Do, YYYY"
-                                                onChange={(e) => this.setState({ tweetsDate: e })} />
-                                        </MuiPickersUtilsProvider>
-                                        <Button
-                                            onClick={() => {
-                                                if (this.state.active === "positive") {
-                                                    this.getBestDate();
-                                                }
-                                                else if (this.state.active === "negative") {
-                                                    this.getWorstDate();
-                                                }
-                                                else if (this.state.active === "all") {
-                                                    this.getTweets();
-                                                }
 
-                                            }}
-                                        >
-                                            Go
-                                        </Button>
-                                    </div>
                                     <Row>
                                         {this.state.tweets.sort((a, b) => {
                                             if (a.score > b.score) {
