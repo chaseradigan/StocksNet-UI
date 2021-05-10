@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Button } from 'antd';
+import { Button, Dropdown, Menu } from 'antd';
 import { AppBar, Typography, Toolbar } from '@material-ui/core';
 import cookie from 'react-cookies'
+import axios from 'axios';
 export default class Navigation extends Component {
     constructor() {
         super();
@@ -21,17 +22,28 @@ export default class Navigation extends Component {
             }
         });
         this.setState({
-            loggedIn: cookie.load('username') === undefined ? false:true
+            loggedIn: cookie.load('username') === undefined ? false : true
         })
 
+    }
+    async deleteAccount() {
+        if (window.confirm("Are you sure you want to delete this account?")) {
+            await axios.delete(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/users/${cookie.load('username')}`)
+                .then(response => {
+                    console.log(response);
+                    this.handleLogout();
+                }).catch(error => {
+                    console.log(error);
+                })
+        }
     }
     onClick(location) {
         this.setState({ active: location });
         this.props.p.history.push(location);
     }
-    handleLogout(){
-        cookie.remove('username', {path:'/'});
-        this.setState({loggedIn:false})
+    handleLogout() {
+        cookie.remove('username', { path: '/' });
+        this.setState({ loggedIn: false })
         this.props.p.history.push("/");
     }
     render() {
@@ -86,14 +98,22 @@ export default class Navigation extends Component {
                     >
                         Sign up
                     </Button>
-                    <Button
+                    <Dropdown.Button
                         size={"large"}
+                        className="logout"
                         style={{ marginLeft: "auto", backgroundColor: "#028C6A", color: "white", border: 'none' }}
                         onClick={() => this.handleLogout()}
                         hidden={cookie.load('username') === undefined || !this.state.loggedIn}
+                        overlay={
+                            <Menu>
+                                <Menu.Item style={{ color: 'red' }} onClick={() => this.deleteAccount()}>
+                                    Delete Account
+                                </Menu.Item>
+                            </Menu>
+                        }
                     >
                         Logout
-                    </Button>
+                    </Dropdown.Button>
                 </Toolbar>
             </AppBar>
         )

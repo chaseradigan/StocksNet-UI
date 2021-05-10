@@ -7,6 +7,7 @@ import Navigation from '../components/Navigation';
 import cookie from 'react-cookies';
 import axios from 'axios';
 import { matchSorter } from 'match-sorter';
+import FullscreenIcon from "@material-ui/icons/Fullscreen"
 export default class AllStocks extends Component {
     constructor() {
         super();
@@ -24,14 +25,14 @@ export default class AllStocks extends Component {
         }
     }
     async getStocks() {
-        await axios.get('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stocks').then(response => {
+        await axios.get('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stocks/fullhistory/latest').then(response => {
             console.log(response.data);
             this.setState({ originalStocks: response.data, stocks: response.data, loading: false })
         }).catch(error => {
             console.log(error);
         })
     }
-    
+
     async getUsersFavorites() {
         this.setState({ loading: true })
         await axios
@@ -46,7 +47,7 @@ export default class AllStocks extends Component {
     async addFavorite(ticker) {
         let payload = {
             "key": {
-                "uid": cookie.load('username'),
+                "id": cookie.load('username'),
                 "ticker": ticker
             },
             "owned": false
@@ -92,27 +93,56 @@ export default class AllStocks extends Component {
                     {this.state.loading ?
                         <Spinner /> :
                         <>
-                            <div style={{ textAlign: 'left', marginBottom:20 }}>
-                                <TextField style={{width:400}} autoComplete="off" name="search" label="Search" onChange={(e) => this.handleSearch(e.target.value)} />
+                            <div style={{ textAlign: 'left', marginBottom: 20 }}>
+                                <TextField style={{ width: 400 }} autoComplete="off" name="search" label="Search" onChange={(e) => this.handleSearch(e.target.value)} />
                             </div>
                             <Table style={{ backgroundColor: "rgba(255,255,255,0.5)" }} className="shadow" hover="true">
                                 <TableHead style={{ backgroundColor: 'white' }}>
                                     <TableRow>
                                         <TableCell style={{ borderTopLeftRadius: 10 }}>Symbol</TableCell>
                                         <TableCell>Name</TableCell>
+                                        <TableCell>Price</TableCell>
+                                        <TableCell>24H +/-</TableCell>
+                                        <TableCell>Sentiment</TableCell>
+                                        <TableCell style={{ textAlign: 'center' }}>View</TableCell>
                                         <TableCell hidden={cookie.load("username") === undefined} style={{ borderTopRightRadius: 10 }}>Favorite</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {this.state.stocks.map(stock => (
+                                    {this.state.stocks.sort((a, b) => {
+                                        let x = a.close - a.open;
+                                        let y = b.close - b.open;
+                                        if (x === y)
+                                            return 0;
+                                        else if (x > y)
+                                            return -1;
+                                        else if (x < y)
+                                            return 1;
+                                    }).map(stock => (
                                         <TableRow key={stock.ticker}>
                                             <TableCell>{stock.ticker}</TableCell>
                                             <TableCell>{stock.companyName}</TableCell>
+                                            <TableCell>
+                                                <span >
+                                                    ${stock.close}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell>
+                                                <span style={stock.close - stock.open > 0 ? { color: 'green' } : { color: 'red' }}>
+                                                    {stock.close - stock.open >= 0 ? `+${Number(stock.close - stock.open).toPrecision(2)}` : `-${Number(stock.close - stock.open).toPrecision(2)}`}
+                                                </span>
+                                            </TableCell>
+                                            <TableCell>{Number(stock.avgScore).toFixed(3)}</TableCell>
+                                            <TableCell style={{ textAlign: 'center' }}>
+                                                <IconButton onClick={() => this.props.history.push(`/stock/${stock.ticker}`)}>
+                                                    <FullscreenIcon style={{ color: 'white' }} />
+                                                </IconButton>
+                                            </TableCell>
                                             <TableCell hidden={cookie.load("username") === undefined}>
                                                 <IconButton
                                                     onClick={() =>
-                                                        this.state.favorites.filter(e => { return e.key.ticker === stock.ticker }).length > 0 ? this.removeFavorite(stock.ticker):
-                                                        this.addFavorite(stock.ticker)}
+                                                        this.state.favorites.filter(e => { return e.key.ticker === stock.ticker }).length > 0 ? this.removeFavorite(stock.ticker) :
+                                                            this.addFavorite(stock.ticker)}
                                                 >
                                                     {
                                                         this.state.favorites.filter(e => { return e.key.ticker === stock.ticker }).length > 0 ?

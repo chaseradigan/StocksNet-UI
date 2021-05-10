@@ -14,14 +14,7 @@ export default class FavoritesCard extends Component {
     
 
     render() {
-        // {
-        //     "key": {
-        //         "uid": 1,
-        //         "ticker": "AAPL"
-        //     },
-        //     "owned": true
-        // }
-        //console.log(this.props.price)
+console.log(this.props)
         return (
             <Card
                 style={{
@@ -46,7 +39,7 @@ export default class FavoritesCard extends Component {
                     }
                     title={
                         <h5>
-                            {this.props.stock.companyName}
+                            {this.props.stock ? this.props.stock.companyName : ''}
                         </h5>
                     }
 
@@ -54,35 +47,24 @@ export default class FavoritesCard extends Component {
                 <CardContent style={{ paddingBottom: 0 }}>
                     <Row style={{ textAlign: 'center', marginBottom: 10 }}>
                         <Col>
+                        <Typography style={{ fontSize: 12 }}>
+                               Price
+                            </Typography>
                             <Typography style={{ margin: 'auto' }} className="textGreen" variant="h4" color="textSecondary" component="h4">
                                 ${this.props.price && this.props.price['close'] ? this.props.price['close'] : "N/A"}
                             </Typography>
+                            
                         </Col>
                         <Col>
+                        <Typography style={{ fontSize: 12 }}>
+                                Sentiment
+                            </Typography>
                             <Typography style={{ margin: 'auto' }} variant="h4" color="textSecondary" component="h4">
-                                {this.props.price && this.props.price['sentiment'] ? this.props.price['sentiment']: "- -"}
+                                {this.props.stock  ? Number(this.props.stock.avgScore).toFixed(3): "- -"}
                             </Typography>
                         </Col>
                     </Row>
-                    <Row>
-                        <Col>
-                            <Typography style={{ fontSize: 12 }}>
-                                24h +/-
-                            </Typography>
-                            <Typography  color="textSecondary" component="p">
-                                $ --
-                            </Typography>
-                        </Col>
-
-                        <Col>
-                            <Typography style={{ fontSize: 12 }}>
-                                24h +/-
-                            </Typography>
-                            <Typography  color="textSecondary" component="p">
-                                --
-                            </Typography>
-                        </Col>
-                    </Row>
+              
                 </CardContent>
                 <CardActions disableSpacing>
                     <IconButton onClick={() => this.props.removeFavorite(this.props.favorite.key.ticker)} aria-label="add to favorites">

@@ -25,17 +25,17 @@ export default class FavoriteStocks extends Component {
     async getUsersFavorites() {
         this.setState({ loading: true })
         await axios
-            .get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/${cookie.load('username')}`)
+            .get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/users/${cookie.load('username')}`)
             .then(response => {
                 console.log(response);
-                this.setState({ favorites: response.data })
+                this.setState({ favorites: response.data.favorites })
             }).catch(error => {
                 console.log(error);
             });
     }
     async toggleOwnerShip(ticker) {
         await axios.post(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/toggleown`, {
-            uid: cookie.load('username'),
+            id: cookie.load('username'),
             ticker: ticker
         })
             .then(response => {
@@ -54,7 +54,7 @@ export default class FavoriteStocks extends Component {
     }
     async getStocks() {
         this.setState({ loading: true })
-        await axios.get('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stocks').then(response => {
+        await axios.get('http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stocks/fullhistory/latest').then(response => {
             console.log(response.data);
             this.setState({ stocks: response.data, loading: false })
         }).catch(error => {
@@ -62,7 +62,11 @@ export default class FavoriteStocks extends Component {
         })
     }
     async removeFavorite(ticker) {
-        await axios.delete(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/${cookie.load('username')}/${ticker}`)
+        let payload={
+            ticker:ticker,
+            id:cookie.load('username')
+        }
+        await axios.delete(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/favoritestock/delete`, {data:payload})
             .then(response => {
                 console.log(response);
                 let favorites = [];
@@ -77,16 +81,17 @@ export default class FavoriteStocks extends Component {
             })
     }
     async getStockPrices() {
-        this.setState({loading:true})
+        this.setState({ loading: true })
         await axios.get("http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/stockhistory/latest")
             .then(response => {
                 console.log(response);
-                this.setState({ prices: response.data, loading:false })
+                this.setState({ prices: response.data, loading: false })
             }).catch(error => {
                 console.log(error);
             })
     }
     render() {
+
         return (
             <>
                 <Navigation p={this.props} />
@@ -104,7 +109,7 @@ export default class FavoriteStocks extends Component {
                                             p={this.props}
                                             favorite={favorite}
                                             stock={this.state.stocks.filter(e => e.ticker === favorite.key.ticker)[0]}
-                                            price={this.state.prices.filter(e=>e.key.ticker === favorite.key.ticker)[0]}
+                                            price={this.state.prices.filter(e => e.key.stock.ticker === favorite.key.ticker)[0]}
                                             toggleOwnerShip={(ownership) => this.toggleOwnerShip(ownership)}
                                             removeFavorite={(ticker) => this.removeFavorite(ticker)}
                                         />
@@ -122,7 +127,7 @@ export default class FavoriteStocks extends Component {
                                             p={this.props}
                                             favorite={favorite}
                                             stock={this.state.stocks.filter(e => e.ticker === favorite.key.ticker)[0]}
-                                            price={this.state.prices.filter(e=>e.key.ticker === favorite.key.ticker)[0]}
+                                            price={this.state.prices.filter(e => e.key.stock.ticker === favorite.key.ticker)[0]}
                                             toggleOwnerShip={(ticker) => this.toggleOwnerShip(ticker)}
                                             removeFavorite={(ticker) => this.removeFavorite(ticker)}
                                         />

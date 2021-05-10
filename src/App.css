@@ -67,6 +67,13 @@
 .MuiPickersToolbar-toolbar, .MuiPickersDay-daySelected{
   background-color:#028C6A !important;
 }
+.MuiCheckbox-colorSecondary.Mui-checked{
+  color:#1DA1F2 !important;
+}
+.logout ,.ant-btn-default{
+  background-color: #028C6A !important;
+  color:white !important;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
