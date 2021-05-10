@@ -117,7 +117,7 @@ export default class SingleStock extends Component {
     async getTweets() {
         this.setState({ loadingTweets: true });
         let fromDate = this.state.tweetsDate.format('YYYY-MM-DD');
-        await axios.get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/tweethistory/${this.props.match.params.ticker}/${fromDate}`)
+        await axios.get(`http://sp21-cs411-29.cs.illinois.edu:8080/api/v1/tweethistory/all/${this.props.match.params.ticker}/${fromDate}`)
             .then(response => {
                 console.log(response.data);
                 this.setState({ tweets: response.data, loadingTweets: false });
